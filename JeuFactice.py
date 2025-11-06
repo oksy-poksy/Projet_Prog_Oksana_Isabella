@@ -15,7 +15,13 @@ class JeuFactice: #architecture du code
     def fin_jeu(self, joeur): pass
 
 
-    # on va faire 10 matrices
+    #Oksana: je me suis dit on devait plus faire une grosse grille, dans laquelle on met les 9 petites
+    def __init__(self):
+        # État interne (simulé)
+        self._grille_principale = None  # etat des 9 matrices (jagné/perdu)
+        self._grilles_secondaires = None  # etat des cases
+
+
 
 
 class Exception():
