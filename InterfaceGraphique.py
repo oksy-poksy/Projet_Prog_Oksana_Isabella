@@ -69,6 +69,7 @@ class UltimateTicTacToeGUI:
 
         image_path = "Menu_Image_Rogne.jpg"
 
+        background_label = None
         try:
             original_image = Image.open(image_path)
             width, height = self.master.winfo_screenwidth(), self.master.winfo_screenheight()
@@ -82,37 +83,63 @@ class UltimateTicTacToeGUI:
             background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         except FileNotFoundError:
-            self.menu_frame.config(bg="#F0F0F0")
             messagebox.showwarning("Erreur Image",
                                    f"Le fichier image '{image_path}' est introuvable. Fond gris utilisé.")
             self.bg_image = None
         except Exception as e:
-            self.menu_frame.config(bg="#F0F0F0")
             messagebox.showwarning("Erreur Image", f"Erreur lors du chargement de l'image : {e}")
             self.bg_image = None
 
         self.menu_frame.pack(fill="both", expand=True, padx=0, pady=0)
 
-        tk.Label(self.menu_frame,text="ULTIMATE TIC TAC TOE",font=("Arial", 24, "bold"), fg='red').pack(pady=30)
-        tk.Label(self.menu_frame, text="Choisissez votre mode de jeu", font=("Arial", 16), fg='red').pack(pady=10)
+        # If we have a background image, draw title/subtitle on a Canvas so there is no white box behind text
+        if background_label is not None and hasattr(self, 'bg_image') and self.bg_image is not None:
+            width, height = self.master.winfo_screenwidth(), self.master.winfo_screenheight()
+            self.menu_canvas = tk.Canvas(self.menu_frame, width=width, height=height, highlightthickness=0)
+            self.menu_canvas.create_image(0, 0, image=self.bg_image, anchor='nw')
+            self.menu_canvas.pack(fill='both', expand=True)
 
-        # Boutons
-        tk.Button(self.menu_frame, text="Joueur vs Joueur (Classique UTTT)", font=("Arial", 14),command=lambda: self.start_game("JvsJ"), width=40, height=2, bg="#FFA07A").pack(pady=10)
-        tk.Button(self.menu_frame, text="Joueur vs Joueur (Pokémon)", font=("Arial", 14),command=lambda: self.start_game("JvsJ_PKMN"), width=40, height=2, bg="#FFA07A").pack(pady=10)
-        tk.Button(self.menu_frame, text="Joueur vs IA", font=("Arial", 14),command=lambda: self.start_game("JvsIA"), width=40, height=2, bg="#FFA07A").pack(pady=10)
-        tk.Button(self.menu_frame, text="IA vs IA (Visualisation)", font=("Arial", 14),command=lambda: self.start_game("IAvsIA"), width=40, height=2, bg="#FFA07A").pack(pady=10)
-        tk.Button(self.menu_frame, text="Quitter", font=("Arial", 14), command=self.master.quit,width=40, height=2, bg="#FA8072").pack(pady=120)
+            # Title and subtitle drawn on canvas (no opaque background)
+            self.menu_canvas.create_text(width/2, 80, text="ULTIMATE TIC TAC TOE", font=("Arial", 24, "bold"), fill='red')
+            self.menu_canvas.create_text(width/2, 120, text="Choisissez votre mode de jeu", font=("Arial", 16), fill='red')
+
+            # Create buttons as normal widgets but placed on the canvas so they float above the image
+            btn_w = 400
+            btn_h = 48
+            start_y = 180
+            gap = 70
+
+            b1 = tk.Button(self.menu_canvas, text="Joueur vs Joueur (Classique UTTT)", font=("Arial", 14), command=lambda: self.start_game("JvsJ"), bg="#FFA07A")
+            self.menu_canvas.create_window(width/2, start_y + 0*gap, window=b1, width=btn_w, height=btn_h)
+            b2 = tk.Button(self.menu_canvas, text="Joueur vs Joueur (Pokémon)", font=("Arial", 14), command=lambda: self.start_game("JvsJ_PKMN"), bg="#FFA07A")
+            self.menu_canvas.create_window(width/2, start_y + 1*gap, window=b2, width=btn_w, height=btn_h)
+            b3 = tk.Button(self.menu_canvas, text="Joueur vs IA", font=("Arial", 14), command=lambda: self.start_game("JvsIA"), bg="#FFA07A")
+            self.menu_canvas.create_window(width/2, start_y + 2*gap, window=b3, width=btn_w, height=btn_h)
+            b4 = tk.Button(self.menu_canvas, text="IA vs IA (Visualisation)", font=("Arial", 14), command=lambda: self.start_game("IAvsIA"), bg="#FFA07A")
+            self.menu_canvas.create_window(width/2, start_y + 3*gap, window=b4, width=btn_w, height=btn_h)
+
+            bq = tk.Button(self.menu_canvas, text="Quitter", font=("Arial", 14), command=self.master.quit, bg="#FA8072")
+            self.menu_canvas.create_window(width/2, start_y + 4*gap + 20, window=bq, width=btn_w, height=btn_h)
+        else:
+            # fallback when no background image: use regular widgets
+            container_for_widgets = self.menu_frame
+            tk.Label(container_for_widgets, text="ULTIMATE TIC TAC TOE", font=("Arial", 24, "bold"), fg='red').pack(pady=30)
+            tk.Label(container_for_widgets, text="Choisissez votre mode de jeu", font=("Arial", 16), fg='red').pack(pady=10)
+
+            # Boutons
+            tk.Button(container_for_widgets, text="Joueur vs Joueur (Classique UTTT)", font=("Arial", 14), command=lambda: self.start_game("JvsJ"), width=40, height=2, bg="#FFA07A").pack(pady=10)
+            tk.Button(container_for_widgets, text="Joueur vs Joueur (Pokémon)", font=("Arial", 14), command=lambda: self.start_game("JvsJ_PKMN"), width=40, height=2, bg="#FFA07A").pack(pady=10)
+            tk.Button(container_for_widgets, text="Joueur vs IA", font=("Arial", 14), command=lambda: self.start_game("JvsIA"), width=40, height=2, bg="#FFA07A").pack(pady=10)
+            tk.Button(container_for_widgets, text="IA vs IA (Visualisation)", font=("Arial", 14), command=lambda: self.start_game("IAvsIA"), width=40, height=2, bg="#FFA07A").pack(pady=10)
+            tk.Button(container_for_widgets, text="Quitter", font=("Arial", 14), command=self.master.quit, width=40, height=2, bg="#FA8072").pack(pady=120)
 
     def start_game(self, mode):
         """Lance le jeu dans le mode sélectionné."""
         self.mode_de_jeu = mode
         self.menu_frame.pack_forget()
         self.jeu = Tictactoe() # Réinitialiser la simulation de jeu
-
-        if mode == "JvsJ":
-            self.show_classic_game_interface()
-        else:
-            self.show_game_interface()
+        # Utiliser l'interface classique (fond et layout UTTT) pour tous les modes
+        self.show_classic_game_interface()
 
     def show_game_interface(self):
         self.game_frame.pack(fill="both", expand=True)
@@ -124,7 +151,7 @@ class UltimateTicTacToeGUI:
         self.game_frame.grid_rowconfigure(0, weight=1)
 
         # --- A. Colonne d'Informations et Score (Gauche) ---
-        info_frame = tk.Frame(self.game_frame, bd=2, relief=tk.GROOVE)
+        info_frame = tk.Frame(self.game_frame, bd=0, relief=tk.FLAT)
         info_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         self.create_info_panel_standard(info_frame)
 
@@ -149,83 +176,55 @@ class UltimateTicTacToeGUI:
 
         self.game_frame.pack(fill="both", expand=True)
 
-        # --- 1. Charger et Placer l'Image de Fond comme Conteneur ---
-        game_bg_image_path = "prairie_horizontale.jpg"  # Nom du fichier que vous avez uploadé
+        # --- 1. Charger et Placer l'Image de Fond sur un Canvas ---
+        game_bg_image_path = "prairie_horizontale.jpg"
         try:
             original_game_image = Image.open(game_bg_image_path)
             width, height = self.master.winfo_screenwidth(), self.master.winfo_screenheight()
-            resized_game_image = original_game_image.resize((width, height), Image.LANCZOS) # Utiliser Image.LANCZOS pour la qualité du redimensionnement
+            resized_game_image = original_game_image.resize((width, height), Image.LANCZOS)
             self.game_bg_photo = ImageTk.PhotoImage(resized_game_image)
 
-            # Le fond devient le CONTENEUR PRINCIPAL pour tous les autres éléments
-            self.main_game_container = tk.Label(self.game_frame, image=self.game_bg_photo)
-            self.main_game_container.place(x=0, y=0, relwidth=1, relheight=1)
+            # Utiliser un Canvas pour dessiner l'image de fond et le texte par-dessus
+            self.main_game_canvas = tk.Canvas(self.game_frame, width=width, height=height, highlightthickness=0)
+            self.main_game_canvas.create_image(0, 0, image=self.game_bg_photo, anchor='nw')
+            self.main_game_canvas.pack(fill="both", expand=True)
 
-            # Configure le Label conteneur pour utiliser GRID
-            for i in range(3):
-                self.main_game_container.grid_columnconfigure(i, weight=1, minsize=180)
-            self.main_game_container.grid_columnconfigure(1, weight=5)  # Colonne centrale large
+            # Créer des textes sur le Canvas (pas de fond opaque)
+            self.canvas_current_text_id = self.main_game_canvas.create_text(width/2, 28, text="", font=("Arial", 14, "bold"), fill="black")
+            self.canvas_target_text_id = self.main_game_canvas.create_text(width/2 + 260, 28, text="", font=("Arial", 12, "italic"), fill="black")
 
-            self.main_game_container.grid_rowconfigure(0, weight=0, minsize=80)
-            self.main_game_container.grid_rowconfigure(1, weight=1)
+            # Textes joueurs gauche/droite (initialement vides)
+            self.canvas_j1_id = self.main_game_canvas.create_text(width*0.12, height/2, text="", font=("Arial", 14), fill="black", anchor='n')
+            self.canvas_j2_id = self.main_game_canvas.create_text(width*0.88, height/2, text="", font=("Arial", 14), fill="black", anchor='n')
+
+            # Créer et placer la zone centrale (grille) en tant que widget sur le Canvas
+            self.center_container = tk.Frame(self.main_game_canvas)
+            # Définir la taille de la fenêtre contenant la grille
+            center_w, center_h = 700, 700
+            center_x, center_y = width/2, height/2
+            self.main_game_canvas.create_window(center_x, center_y, window=self.center_container, width=center_w, height=center_h)
+
+            # Grille UTTT (gardée comme Frame pour conserver la logique actuelle)
+            self.uttt_frame = tk.Frame(self.center_container, bg="light sky blue", bd=5, relief=tk.SUNKEN, width=center_w, height=center_h)
+            self.uttt_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            self.uttt_frame.grid_propagate(False)
+            self.create_uttt_grid(self.uttt_frame, font_size=28)
+
+            # Bouton Retour Menu : petit bouton placé sur le Canvas (en bas à gauche)
+            self.return_button = tk.Button(self.main_game_canvas, text="Retour Menu", command=self.show_menu, bg="sea green", fg="white")
+            self.main_game_canvas.create_window(width*0.12, height-60, window=self.return_button, width=160, height=36)
 
         except FileNotFoundError:
-            self.game_frame.config(bg="#E0FFFF")
-            messagebox.showwarning("Erreur Image",
-                                   f"Le fichier image '{game_bg_image_path}' est introuvable. Fond bleu clair utilisé.")
-            return  # Sortir si l'image est critique
+            messagebox.showwarning("Erreur Image", f"Le fichier image '{game_bg_image_path}' est introuvable. Fond bleu clair utilisé.")
+            return
         except Exception as e:
-            self.game_frame.config(bg="#E0FFFF")
             messagebox.showwarning("Erreur Image", f"Erreur critique lors du chargement de l'image : {e}")
             return
 
-        global_info_frame = tk.Frame(self.main_game_container, bd=2, relief=tk.RAISED, bg='')
-        global_info_frame.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
-        self.create_global_info_classic(global_info_frame)
-
-        # 2.2 Panneau J1 (Ligne 1, Colonne 0)
-        info_j1_frame = tk.Frame(self.main_game_container, bd=2, relief=tk.GROOVE, bg='')
-        info_j1_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-        self.create_player_info_panel_classic(info_j1_frame, "Joueur 1", self.jeu.J1, is_left_panel=True)
-
-        # 2.3 Conteneur de la Grille (Ligne 1, Colonne 1)
-        # Note: center_container est juste un Frame vide ici, donc bg=''
-        self.center_container = tk.Frame(self.main_game_container, bg='')
-        self.center_container.grid(row=1, column=1, sticky="nsew", padx=10, pady=5)
-        self.center_container.grid_rowconfigure(0, weight=1)
-        self.center_container.grid_columnconfigure(0, weight=1)
-
-        # Grille UTTT (couleur opaque pour le jeu)
-        self.uttt_frame = tk.Frame(self.center_container, bg="light sky blue", bd=5, relief=tk.SUNKEN, width=700, height=700)
-        self.uttt_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        self.uttt_frame.grid_propagate(False)
-        self.create_uttt_grid(self.uttt_frame, font_size=28)
-
-        # 2.4 Panneau J2 (Ligne 1, Colonne 2)
-        info_j2_frame = tk.Frame(self.main_game_container, bd=2, relief=tk.GROOVE, bg='')
-        info_j2_frame.grid(row=1, column=2, sticky="nsew", padx=5, pady=5)
-        self.create_player_info_panel_classic(info_j2_frame, "Joueur 2", self.jeu.J2, is_left_panel=False)
-
-        # Bouton Retour Menu (couleur opaque)
-        tk.Button(info_j1_frame, text="Retour Menu", command=self.show_menu, bg="sea green", fg="white").pack(pady=20,fill="x",side="bottom")
-
+        # Mettre à jour l'affichage initial
         self.update_game_state()
 
     # Panneau d'Infos Globales (Mode Classique)
-        def create_global_info_classic(self, parent_frame):
-            # Le parent_frame est opaque (blanc), mais les Labels à l'intérieur n'auront pas de BG spécifié.
-            parent_frame.grid_columnconfigure(0, weight=1)
-            parent_frame.grid_columnconfigure(1, weight=1)
-
-            # Joueur Actuel
-            self.current_player_var = tk.StringVar(value="Joueur Actuel: ")
-            tk.Label(parent_frame, textvariable=self.current_player_var, font=("Arial", 16, "bold"), fg="white").grid(
-                row=0, column=0, padx=20, pady=5, sticky="e")
-
-            # Grille Ciblée
-            self.info_panel_target_var = tk.StringVar(value="Grille Ciblée: Aucune")
-            tk.Label(parent_frame, textvariable=self.info_panel_target_var, font=("Arial", 14, "italic"), bg = "cornflower blue"
-                     ).grid(row=0, column=1, padx=20, pady=5, sticky="w")
 
 
     def create_global_info_classic(self, parent_frame):
@@ -234,11 +233,11 @@ class UltimateTicTacToeGUI:
 
         # Joueur Actuel
         self.current_player_var = tk.StringVar(value="Joueur Actuel: ")
-        tk.Label(parent_frame, textvariable=self.current_player_var,font=("Arial", 16, "bold"), bg="#E0FFFF").grid(row=0, column=0, padx=20, pady=5, sticky="e")
+        tk.Label(parent_frame, textvariable=self.current_player_var, font=("Arial", 16, "bold")).grid(row=0, column=0, padx=20, pady=5, sticky="e")
 
         # Grille Ciblée
         self.info_panel_target_var = tk.StringVar(value="Grille Ciblée: Aucune")
-        tk.Label(parent_frame, textvariable=self.info_panel_target_var,font=("Arial", 14, "italic"), bg="#E0FFFF").grid(row=0, column=1, padx=20, pady=5, sticky="w")
+        tk.Label(parent_frame, textvariable=self.info_panel_target_var, font=("Arial", 14, "italic")).grid(row=0, column=1, padx=20, pady=5, sticky="w")
 
     #étails du Panneau d'Informations (Classique - JvsJ)
     def create_player_info_panel_classic(self, parent_frame, player_label, player_sign, is_left_panel):
@@ -377,6 +376,35 @@ class UltimateTicTacToeGUI:
             self.info_panel_target_var.set(target_text)
         elif self.target_grid_var:
             self.target_grid_var.set(target_text)
+
+        # If we drew text on a Canvas, update those canvas text items too (no opaque panels)
+        if hasattr(self, 'main_game_canvas'):
+            try:
+                current_text = f"Joueur Actuel: ({current_player_signe})"
+                self.main_game_canvas.itemconfig(self.canvas_current_text_id, text=current_text)
+                self.main_game_canvas.itemconfig(self.canvas_target_text_id, text=target_text)
+
+                # Update player left/right text if available
+                j1_text = ""
+                j2_text = ""
+                if self.score_j1_var:
+                    j1_score = self.score_j1_var.get()
+                else:
+                    j1_score = f"{self.jeu.J1}: 0"
+                if self.score_j2_var:
+                    j2_score = self.score_j2_var.get()
+                else:
+                    j2_score = f"{self.jeu.J2}: 0"
+
+                j1_text = f"Joueur 1 ({self.jeu.J1})\n\nScore (UTTT Win):\n{j1_score}"
+                j2_text = f"Joueur 2 ({self.jeu.J2})\n\nScore (UTTT Win):\n{j2_score}"
+
+                if j1_text:
+                    self.main_game_canvas.itemconfig(self.canvas_j1_id, text=j1_text)
+                if j2_text:
+                    self.main_game_canvas.itemconfig(self.canvas_j2_id, text=j2_text)
+            except Exception:
+                pass
 
         # Mise à jour de la Grille UTTT
         for principal_coords in range(9):
