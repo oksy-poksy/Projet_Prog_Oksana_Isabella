@@ -1,65 +1,5 @@
-
-
 from JeuFactice import JeuFactice
 from random import choice #a la place de random car ca faisiait une erreur
-
-class Tictactoe(JeuFactice):
-    def __init__(self):
-        super().__init__()
-
-        self.plateau = {i: [[0, 0, 0] for k in range(3)] for i in range(1, 10)}
-        self.J1 = "O"
-        self.J2 = "X"
-
-        # CORRECTION de l'erreur : utilisation de choice()
-        self.jactuel = choice([self.J1, self.J2])
-        self.grille_actu = None # self.G1 n'etait pas défini, on l'initialise à None
-
-        self._plateau_ihm = {}
-        self._joueur_actuel_signe = self.jactuel  # Synchronisation
-        self._grille_cible = None  # Grille ciblée (0 à 8)
-
-    def premier_tour(self, joueur, grille, case):
-        self.grille_actu = self.plateau[grille]
-        self.grille_actu[case[1]][case[0]] = joueur
-
-    def nomjsp(self, joueur, grille, case):
-        # CORRECTION: = au lieu de ==
-        self.plateau[grille][case[0]][case[1]] = joueur
-
-
-    # --- MÉTHODES UTILISÉES PAR L'INTERFACE GRAPHIQUE ---
-
-    def get_joueur_actuel_signe(self):
-        """Retourne le signe (X ou O) du joueur actuel"""
-        return self._joueur_actuel_signe
-
-    def get_grille_cible(self):
-        """Retourne l'indice (0 à 8) de la grille ciblée ou None si libre (IHM)."""
-        return self._grille_cible
-
-    def get_etat_case(self, i_principal, i_secondaire):
-        """Retourne le signe ('X' ou 'O') à la position ou une chaîne vide (IHM)."""
-        return self._plateau_ihm.get((i_principal, i_secondaire), "")
-
-    def jouer_coup_simule(self, i_principal, i_secondaire):
-        """
-        Simule la logique minimale pour l'affichage (Placement, Changement de Joueur, Grille Cible).
-        C'est cette fonction que l'IHM doit appeler.
-        """
-        if self.get_etat_case(i_principal, i_secondaire) == "":
-
-            is_valid_target = (self._grille_cible is None) or (self._grille_cible == i_principal)
-
-            if is_valid_target:
-                self._plateau_ihm[(i_principal, i_secondaire)] = self._joueur_actuel_signe
-                self._joueur_actuel_signe = self.J2 if self._joueur_actuel_signe == self.J1 else self.J1
-                self._grille_cible = i_secondaire
-                return True
-        return False
-
-coord_case={(0,0):0,(0,1):1,(0,2):2,(1,0):3,(1,1):4,(1,2):5,(2,0):6,(2,1):7,(2,2):8} #sert à récupérer la coord de la prochaine grille à jouer
-
 
 class Cellule:
     def __init__(self):
@@ -308,13 +248,3 @@ class Jeu():
         output += f"--- Plateau Global ---\n"
         output += repr(self.plateau)  # Utilise la surcharge de GrilleGlobale
         return output
-
-
-
-
-
-
-
-
-
-
