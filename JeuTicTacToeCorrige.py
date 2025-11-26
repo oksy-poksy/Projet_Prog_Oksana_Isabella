@@ -1,5 +1,3 @@
-# JeuTicTacToe.py
-
 from JeuFactice import JeuFactice
 from random import choice #a la place de random car ca faisiait une erreur
 
@@ -207,15 +205,16 @@ class Jeu():
             if termine:
                 return True
 
-            prochaine_grille = self.plateau.get_petite_grille(case)
+            coord_prochaine_grille = case
+            prochaine_grille = self.plateau.get_petite_grille(coord_prochaine_grille)
 
-            elif prochaine_grille.gagnant==None:
-                self.grille_actuelle=prochaine_grille
-
-            else: #la grille est deja pleine et/ou gagné donc le prochain pourra jouer n'importe ou
-                self.grille_actuelle=None
+            if prochaine_grille.gagnant is None and not prochaine_grille.est_plein():
+                self.grille_actuelle = coord_prochaine_grille
+            else:
+                self.grille_actuelle = None
 
             self.changer_joueur()
+            return False
 
 
 
