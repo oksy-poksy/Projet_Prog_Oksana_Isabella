@@ -253,6 +253,7 @@ class UltimateTicTacToeGUI:
 
     def create_uttt_grid(self, parent_frame, font_size):
         self.buttons = {}
+
         self.small_grid_frames = {}
         for i in range(3):
             parent_frame.grid_rowconfigure(i, weight=1)
@@ -289,11 +290,12 @@ class UltimateTicTacToeGUI:
         try:
             if self.jeu.jouer_coup_global(principal_coords, secondary_coords):
                 self.update_game_state()
+
             else:
-                if self.jeu.get_etat_case(principal_coords, secondary_coords) != None:
+                if self.jeu.get_etat_case(principal_coords, secondary_coords) != "":
                     msg = "La case est déjà occupée."
-                elif self.jeu.grille_actuelle is not None:
-                    msg = f"Vous devez jouer dans la Grille {self.jeu.grille_actuelle_index+ 1}."
+                if self.jeu.grille_actuelle != self.jeu.plateau.get_petite_grille(principal_coords):
+                    msg = f"Vous devez jouer dans la Grille {self.jeu.grille_actuelle_index + 1}."
                 else:
                     msg = "Coup invalide."
                 messagebox.showerror("Coup Invalide", msg)
@@ -302,8 +304,20 @@ class UltimateTicTacToeGUI:
 
     def update_game_state(self):
         current_player_signe = self.jeu.joueur_actuel
+        #target_grid = self.jeu.grille_actuelle
         target_grid_index = self.jeu.grille_actuelle_index
+        #print("target_grid", target_grid)
 
+
+        if self.current_player_var:
+            self.current_player_var.set(f"Joueur Actuel: ({current_player_signe})")
+
+        target_text = f"Grille Ciblée: {target_grid_index + 1}" if target_grid_index is not None else "Grille Ciblée: Aucune (Libre)"
+
+        if self.mode_de_jeu == "JvsJ" and self.info_panel_target_var:
+            self.info_panel_target_var.set(target_text)
+        elif self.target_grid_var:
+            self.target_grid_var.set(target_text)
         # --- Mise à jour des textes sur le Canvas (inchangé) ---
         target_text = f"Grille Ciblée: {target_grid_index + 1}" if target_grid_index is not None else "Grille Ciblée: Aucune (Libre)"
 
@@ -346,6 +360,7 @@ class UltimateTicTacToeGUI:
 
             # --- Gestion des cases individuelles (boutons) ---
             for secondary_coords in range(9):
+
                 if principal_coords in self.buttons and secondary_coords in self.buttons[principal_coords]:
 
                     etat_case = self.jeu.get_etat_case(principal_coords, secondary_coords)

@@ -113,19 +113,23 @@ class PetiteGrille:
             return False, None
 
         # verif colonne
-        if self.grille[0][casec].valeur == self.grille[1][casec].valeur == self.grille[2][casec].valeur:
+        if self.grille[0][casec].valeur == self.grille[1][casec].valeur == self.grille[2][casec].valeur !=None:
+
             self.gagnant = self.grille[0][casec].valeur
             return True, self.grille[casel][casec].valeur
 
-        if self.grille[casel][0].valeur == self.grille[casel][1].valeur == self.grille[casel][2].valeur:
+        if self.grille[casel][0].valeur == self.grille[casel][1].valeur == self.grille[casel][2].valeur != None:
+
             self.gagnant = self.grille[0][casec].valeur
             return True, self.grille[casel][casec].valeur
 
         if case_index in [0, 2, 4, 6, 8]:
-            if self.grille[0][0].valeur == self.grille[1][1].valeur == self.grille[2][2].valeur:
+            if self.grille[0][0].valeur == self.grille[1][1].valeur == self.grille[2][2].valeur !=None:
+
                 self.gagnant = self.grille[0][casec].valeur
                 return True, self.grille[casel][casec].valeur
-            if self.grille[0][2].valeur == self.grille[1][1].valeur == self.grille[2][0].valeur:
+            if self.grille[0][2].valeur == self.grille[1][1].valeur == self.grille[2][0].valeur != None:
+
                 self.gagnant = self.grille[0][casec].valeur
                 return True, self.grille[casel][casec].valeur
         return False, None
@@ -179,9 +183,14 @@ class GrilleGlobale(PetiteGrille):
                 self.gagnant_global = self.grille_global[0][0].gagnant
                 return True, self.grille_global[0][0].gagnant
             if self.grille_global[0][2].gagnant == self.grille_global[1][1].gagnant == self.grille_global[2][0].gagnant:
+                print(self.grille_global[0][2])
+                print(self.grille_global[1][1])
+                print(self.grille_global[2][0])
                 self.gagnant_global = self.grille_global[0][2].gagnant
                 return True, self.gagnant_global
+
         return False, None
+
     def get_petite_grille(self, grille):
         #grille=1,...,8
         #accéder à la petite grille
@@ -230,8 +239,11 @@ class Jeu():
         # L'argument 'grille' est l'index de la grille cliquée (0 à 8)
 
         # 1. Vérification de la grille ciblée (si elle est définie)
+
         if self.grille_actuelle_index is not None:
+
             if grille != self.grille_actuelle_index:
+                print(2)
                 # Si une grille est ciblée et que le coup n'est pas dans cette grille
                 return False
 
@@ -240,6 +252,7 @@ class Jeu():
         # 2. Vérification si la petite grille est déjà gagnée/nulle
         # On ne peut pas jouer dans une petite grille déjà terminée.
         if grille_visee.gagnant is not None:
+            print(30)
             return False
 
         # 3. Vérification si la case est déjà occupée
@@ -247,6 +260,7 @@ class Jeu():
 
         # 💡 CORRECTION CRITIQUE : case_visee est un objet Cellule, il faut vérifier sa valeur interne.
         if case_visee.valeur is not None:
+            print(4)
             return False  # La case est déjà occupée
 
         return True
@@ -265,30 +279,31 @@ class Jeu():
 
         petite_grille=self.plateau.get_petite_grille(grille)
         petite_grille.jouer_coup(case,self.joueur_actuel)
+
         if petite_grille.verifier_victoire(case):
             self.grille_gagne.append(grille)
 
+        prochaine_grille = self.plateau.get_petite_grille(case)
+        self.grille_actuelle = prochaine_grille
+        self.grille_actuelle_index = case
 
-        print("Test Cde")
-        print(petite_grille)
         termine, gagnant = self.plateau.verifier_victoire_globale(grille)
         print(termine,gagnant)
         if termine:
             self.plateau.gagnant_global= gagnant
             return True
 
-        prochaine_grille = self.plateau.get_petite_grille(case)
-
         #if prochaine_grille.gagnant==None and not prochaine_grille.est_plein():
-        self.grille_actuelle= prochaine_grille
-        self.grille_actuelle_index=case
+
         print(f"prochaine grille gagnat {prochaine_grille.gagnant}")
 
 
         if prochaine_grille.gagnant!=None: #la grille est deja pleine et/ou gagné donc le prochain pourra jouer n'importe ou
-            #changer sinon ca va beuger avec la verificaiton des est valide
+            #changer sinon ca va beuger avec la verification des est valide
             self.grille_actuelle=None
             self.grille_actuelle_index = None
+
+        print(self.grille_actuelle_index)
 
         self.changer_joueur()
         return True
