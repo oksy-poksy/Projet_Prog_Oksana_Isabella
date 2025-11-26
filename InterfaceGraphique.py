@@ -100,13 +100,13 @@ class UltimateTicTacToeGUI:
             self.menu_canvas.pack(fill='both', expand=True)
 
             # Title and subtitle drawn on canvas (no opaque background)
-            self.menu_canvas.create_text(width/2, 80, text="ULTIMATE TIC TAC TOE", font=("Arial", 24, "bold"), fill='red')
-            self.menu_canvas.create_text(width/2, 120, text="Choisissez votre mode de jeu", font=("Arial", 16), fill='red')
+            self.menu_canvas.create_text(width/2, 80, text="ULTIMATE TIC TAC TOE", font=("Arial", 24, "bold"), fill='white')
+            self.menu_canvas.create_text(width/2, 120, text="Choisissez votre mode de jeu", font=("Arial", 16), fill='white')
 
             # Create buttons as normal widgets but placed on the canvas so they float above the image
             btn_w = 400
             btn_h = 48
-            start_y = 180
+            start_y = 250
             gap = 70
 
             b1 = tk.Button(self.menu_canvas, text="Joueur vs Joueur (Classique UTTT)", font=("Arial", 14), command=lambda: self.start_game("JvsJ"), bg="#FFA07A")
@@ -119,7 +119,7 @@ class UltimateTicTacToeGUI:
             self.menu_canvas.create_window(width/2, start_y + 3*gap, window=b4, width=btn_w, height=btn_h)
 
             bq = tk.Button(self.menu_canvas, text="Quitter", font=("Arial", 14), command=self.master.quit, bg="#FA8072")
-            self.menu_canvas.create_window(width/2, start_y + 4*gap + 20, window=bq, width=btn_w, height=btn_h)
+            self.menu_canvas.create_window(width/2, start_y + 4*gap + 60, window=bq, width=btn_w, height=btn_h)
         else:
             # fallback when no background image: use regular widgets
             container_for_widgets = self.menu_frame
@@ -211,8 +211,8 @@ class UltimateTicTacToeGUI:
             self.create_uttt_grid(self.uttt_frame, font_size=28)
 
             # Bouton Retour Menu : petit bouton placé sur le Canvas (en bas à gauche)
-            self.return_button = tk.Button(self.main_game_canvas, text="Retour Menu", command=self.show_menu, bg="sea green", fg="white")
-            self.main_game_canvas.create_window(width*0.12, height-60, window=self.return_button, width=160, height=36)
+            self.return_button = tk.Button(self.main_game_canvas, text="Retour Menu", font=("Arial", 14) , command=self.show_menu, bg="sea green", fg="white")
+            self.main_game_canvas.create_window(width*0.12, height-110, window=self.return_button, width=160, height=36)
 
         except FileNotFoundError:
             messagebox.showwarning("Erreur Image", f"Le fichier image '{game_bg_image_path}' est introuvable. Fond bleu clair utilisé.")
@@ -221,10 +221,7 @@ class UltimateTicTacToeGUI:
             messagebox.showwarning("Erreur Image", f"Erreur critique lors du chargement de l'image : {e}")
             return
 
-        # Mettre à jour l'affichage initial
-        self.update_game_state()
-
-    # Panneau d'Infos Globales (Mode Classique)
+        self.update_game_state() # Mettre à jour l'affichage initial
 
 
     def create_global_info_classic(self, parent_frame):
@@ -315,37 +312,6 @@ class UltimateTicTacToeGUI:
                     else:
                         btn.config(bg="SystemButtonFace", relief=tk.FLAT)
 
-    # --- C. Détails de la Sidebar Pokémon ---
-    def create_pokemon_sidebar(self, parent_frame):
-        """Crée le panneau pour la sélection du Pokémon et le banc."""
-        tk.Label(parent_frame, text="🔥 Banc de Pokémons 🔥", font=("Arial", 14, "bold")).pack(pady=10)
-
-        # Afficher la liste de Pokémons uniquement dans les modes qui en ont besoin
-        if self.mode_de_jeu in ["JvsJ_PKMN", "JvsIA", "IAvsIA"]:
-            tk.Label(parent_frame, text="30 Pokémons populaires :", font=("Arial", 10, "italic")).pack(pady=5)
-
-            self.pokemon_list_frame = tk.Frame(parent_frame)
-            self.pokemon_list_frame.pack(fill="both", expand=True, padx=5, pady=10)
-
-            canvas = tk.Canvas(self.pokemon_list_frame)
-            scrollbar = tk.Scrollbar(self.pokemon_list_frame, orient="vertical", command=canvas.yview)
-            scrollable_frame = tk.Frame(canvas)
-
-            scrollable_frame.bind("<Configure>",lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-
-            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-            canvas.configure(yscrollcommand=scrollbar.set)
-
-            canvas.pack(side="left", fill="both", expand=True)
-            scrollbar.pack(side="right", fill="y")
-
-            if self.pokemons_populaires:
-                for name, total in self.pokemons_populaires:
-                    tk.Button(scrollable_frame,text=f"{name} (Force: {total})",command=lambda p_name=name: print(f"Sélectionné: {p_name}")).pack(fill="x", padx=10, pady=2)
-            else:
-                tk.Label(scrollable_frame,text="Impossible de charger la liste des Pokémons. (Fichier pokemon (1).csv manquant)",fg="red", wraplength=180).pack(pady=5)
-        else:
-            tk.Label(parent_frame, text="Ce mode de jeu n'utilise pas de Pokémons.", font=("Arial", 12)).pack(pady=20) # pas de banc de poks pour le mode classique
 
     def handle_click(self, principal_coords, secondary_coords):
         """Gère le clic de l'utilisateur sur une case (appelle la simulation de JeuTicTacToeCorrige)."""
@@ -377,7 +343,6 @@ class UltimateTicTacToeGUI:
         elif self.target_grid_var:
             self.target_grid_var.set(target_text)
 
-        # If we drew text on a Canvas, update those canvas text items too (no opaque panels)
         if hasattr(self, 'main_game_canvas'):
             try:
                 current_text = f"Joueur Actuel: ({current_player_signe})"
@@ -396,8 +361,8 @@ class UltimateTicTacToeGUI:
                 else:
                     j2_score = f"{self.jeu.J2}: 0"
 
-                j1_text = f"Joueur 1 ({self.jeu.J1})\n\nScore (UTTT Win):\n{j1_score}"
-                j2_text = f"Joueur 2 ({self.jeu.J2})\n\nScore (UTTT Win):\n{j2_score}"
+                j1_text = f"Joueur 1 ({self.jeu.J1})\n\nScore:\n{j1_score}"
+                j2_text = f"Joueur 2 ({self.jeu.J2})\n\nScore:\n{j2_score}"
 
                 if j1_text:
                     self.main_game_canvas.itemconfig(self.canvas_j1_id, text=j1_text)
