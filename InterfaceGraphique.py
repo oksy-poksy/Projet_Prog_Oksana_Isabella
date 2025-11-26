@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from JeuTicTacToeCorrige import Tictactoe
 import pandas as pd
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk #TENTATIVE
 
 
 class UltimateTicTacToeGUI:
