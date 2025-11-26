@@ -253,14 +253,21 @@ class UltimateTicTacToeGUI:
 
     def create_uttt_grid(self, parent_frame, font_size):
         self.buttons = {}
+        self.small_grid_frames = {}
+        for i in range(3):
+            parent_frame.grid_rowconfigure(i, weight=1)
+            parent_frame.grid_columnconfigure(i, weight=1)
+
         for i in range(3):
             parent_frame.grid_rowconfigure(i, weight=1)
             parent_frame.grid_columnconfigure(i, weight=1)
 
         for i_p in range(3):
             for j_p in range(3):
-                small_grid_frame = tk.Frame(parent_frame, bd=1, relief=tk.RIDGE, bg="light sky blue")
+                small_grid_frame = tk.Frame(parent_frame, bd=3, relief=tk.RIDGE, bg="white")
                 principal_coords = i_p * 3 + j_p
+                self.small_grid_frames[principal_coords] = small_grid_frame
+
                 small_grid_frame.grid(row=i_p, column=j_p, padx=3, pady=3, sticky="nsew")
 
                 for r in range(3):
@@ -272,13 +279,13 @@ class UltimateTicTacToeGUI:
                 for i_s in range(3):
                     for j_s in range(3):
                         secondary_coords = i_s * 3 + j_s
-                        btn = tk.Button(small_grid_frame, text="", font=("Arial",font_size), command=lambda pc=principal_coords, sc=secondary_coords: self.handle_click(pc,sc),bg="#D3D3D3", bd=1, relief=tk.SUNKEN, width=1, height=1)
+                        btn = tk.Button(small_grid_frame, text="", font=("Arial",font_size), command=lambda pc=principal_coords, sc=secondary_coords: self.handle_click(pc,sc),bg="white", bd=1, relief=tk.SUNKEN, width=1, height=1)
                         btn.grid(row=i_s, column=j_s, sticky="nsew", padx=1, pady=1)
                         self.buttons[principal_coords][secondary_coords] = btn
 
 
     def handle_click(self, principal_coords, secondary_coords):
-        """Gère le clic de l'utilisateur sur une case (appelle la simulation de JeuTicTacToeCorrige)."""
+        """Gère le clic de l'utilisateur sur une case """
         try:
             if self.jeu.jouer_coup_global(principal_coords, secondary_coords):
                 self.update_game_state()
@@ -293,20 +300,12 @@ class UltimateTicTacToeGUI:
         except Exception as e:
             messagebox.showerror("Erreur de Jeu", f"Erreur critique: {e}")
 
-    def update_game_state(self): #mise à Jour de l'Interface
+    def update_game_state(self):
         current_player_signe = self.jeu.joueur_actuel
-        target_grid = self.jeu.grille_actuelle
         target_grid_index = self.jeu.grille_actuelle_index
 
-        if self.current_player_var:
-            self.current_player_var.set(f"Joueur Actuel: ({current_player_signe})")
-
-        target_text = f"Grille Ciblée: {target_grid_index + 1}" if target_grid is not None else "Grille Ciblée: Aucune (Libre)"
-
-        if self.mode_de_jeu == "JvsJ" and self.info_panel_target_var:
-            self.info_panel_target_var.set(target_text)
-        elif self.target_grid_var:
-            self.target_grid_var.set(target_text)
+        # --- Mise à jour des textes sur le Canvas (inchangé) ---
+        target_text = f"Grille Ciblée: {target_grid_index + 1}" if target_grid_index is not None else "Grille Ciblée: Aucune (Libre)"
 
         if hasattr(self, 'main_game_canvas'):
             try:
@@ -314,18 +313,8 @@ class UltimateTicTacToeGUI:
                 self.main_game_canvas.itemconfig(self.canvas_current_text_id, text=current_text)
                 self.main_game_canvas.itemconfig(self.canvas_target_text_id, text=target_text)
 
-                # Update player left/right text if available
-                j1_text = ""
-                j2_text = ""
-                if self.score_j1_var:
-                    j1_score = self.score_j1_var.get()
-                else:
-                    j1_score = f"{self.jeu.J1}: 0"
-                if self.score_j2_var:
-                    j2_score = self.score_j2_var.get()
-                else:
-                    j2_score = f"{self.jeu.J2}: 0"
-
+                j1_score = self.score_j1_var.get() if self.score_j1_var else f"{self.jeu.J1}: 0"
+                j2_score = self.score_j2_var.get() if self.score_j2_var else f"{self.jeu.J2}: 0"
                 j1_text = f"Joueur 1 ({self.jeu.J1})\n\nScore:\n{j1_score}"
                 j2_text = f"Joueur 2 ({self.jeu.J2})\n\nScore:\n{j2_score}"
 
@@ -336,26 +325,45 @@ class UltimateTicTacToeGUI:
             except Exception:
                 pass
 
-        # Mise à jour de la Grille UTTT
+        # --- Mise à Jour de la Grille UTTT et de la Surbrillance ---
         for principal_coords in range(9):
-            for secondary_coords in range(9):
 
+            if principal_coords in self.small_grid_frames:
+                frame = self.small_grid_frames[principal_coords]
+
+                # 1. État par défaut: Blanc, Cadre RIDGE normal
+                frame.config(bg="light sky blue", bd=3, relief=tk.RIDGE)
+
+                if target_grid_index is None:
+                    # 2. Libre Choix: Surligner toutes les grilles non gagnées en Light Sky Blue
+                    petite_grille = self.jeu.plateau.get_petite_grille(principal_coords)
+                    if petite_grille.gagnant is None:
+                        frame.config(bg="light sky blue", bd=4, relief=tk.RIDGE)
+
+                elif principal_coords == target_grid_index:
+                    # 3. Grille Ciblée : Light Sky Blue et Cadre NOIR (avant l'astuce highlightbackground)
+                    frame.config(bg="black", bd=3, relief=tk.RAISED, highlightbackground="black", highlightcolor="black")
+
+            # --- Gestion des cases individuelles (boutons) ---
+            for secondary_coords in range(9):
                 if principal_coords in self.buttons and secondary_coords in self.buttons[principal_coords]:
 
-                    etat_case = self.jeu.get_etat_case(principal_coords,secondary_coords)
+                    etat_case = self.jeu.get_etat_case(principal_coords, secondary_coords)
                     btn = self.buttons[principal_coords][secondary_coords]
 
                     btn.config(text=etat_case)
 
-                    # couleur de fond pour la grille ciblée et jouée
-                    if target_grid is not None and principal_coords == target_grid:
-                        btn.config(bg="#ADD8E6")  # Bleu clair (cible)
+                    if target_grid_index is not None and principal_coords == target_grid_index:
+                        # Case dans la grille ciblée : Fond Light Sky Blue, relief FLAT
+                        btn.config(bg="light sky blue", relief=tk.FLAT, fg="black")
 
                     elif etat_case != "":
+                        # Case jouée (X ou O)
                         bg_color = "#C0C0C0" if etat_case == self.jeu.J1 else "#D3D3D3"
-                        btn.config(bg=bg_color,relief=tk.SUNKEN, sticky="nsew")
+                        btn.config(bg=bg_color, relief=tk.SUNKEN)
                     else:
-                        btn.config(bg="SystemButtonFace", relief=tk.FLAT)
+                        # État par défaut (Non jouée, non ciblée) : Blanc
+                        btn.config(bg="white", relief=tk.FLAT)
 
 
 

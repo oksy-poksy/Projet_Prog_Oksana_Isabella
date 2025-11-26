@@ -1,5 +1,3 @@
-
-
 from JeuFactice import JeuFactice
 from random import choice #a la place de random car ca faisiait une erreur
 
@@ -108,6 +106,12 @@ class PetiteGrille:
         casel = case[0]
         casec = case[1]
 
+        joueur = self.grille[casel][casec].valeur
+
+        # Si le coup n'a pas encore de valeur (ce qui ne devrait pas arriver ici), on sort
+        if joueur is None:
+            return False, None
+
         # verif colonne
         if self.grille[0][casec].valeur == self.grille[1][casec].valeur == self.grille[2][casec].valeur:
             self.gagnant = self.grille[0][casec].valeur
@@ -132,6 +136,7 @@ class PetiteGrille:
             return True, "NUL"
 
         return False, None
+
     def get_case(self,case):
         coord_case=self.get_coords(case)
         return self.grille[coord_case[0]][coord_case[1]]
