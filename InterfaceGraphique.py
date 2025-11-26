@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from JeuTicTacToeCorrige import Tictactoe
+from JeuTicTacToeCorrige import Jeu
 import pandas as pd
 from PIL import Image, ImageTk #TENTATIVE
 
@@ -20,7 +20,7 @@ class UltimateTicTacToeGUI:
             messagebox.showwarning("Fichier Manquant","Le fichier 'pokemon (1).csv' est introuvable. Le panneau Pokémon sera vide.")
             self.pokemons_populaires = []
 
-        self.jeu = Tictactoe()
+        self.jeu = Jeu()
 
         # Variables pour le layout
         self.uttt_frame = None
@@ -137,7 +137,7 @@ class UltimateTicTacToeGUI:
         """Lance le jeu dans le mode sélectionné."""
         self.mode_de_jeu = mode
         self.menu_frame.pack_forget()
-        self.jeu = Tictactoe() # Réinitialiser la simulation de jeu
+        self.jeu = Jeu() # Réinitialiser la simulation de jeu
         # Utiliser l'interface classique (fond et layout UTTT) pour tous les modes
         self.show_classic_game_interface()
 
@@ -277,52 +277,16 @@ class UltimateTicTacToeGUI:
                         self.buttons[principal_coords][secondary_coords] = btn
 
 
-    def update_game_state(self):
-        current_player_signe = self.jeu.get_joueur_actuel_signe()
-        target_grid = self.jeu.get_grille_cible()
-
-        if self.current_player_var:
-            self.current_player_var.set(f"Joueur Actuel: ({current_player_signe})")
-
-        target_text = f"Grille Ciblée: {target_grid + 1}" if target_grid is not None else "Grille Ciblée: Aucune (Libre)"
-
-        if self.mode_de_jeu == "JvsJ" and self.info_panel_target_var:
-            self.info_panel_target_var.set(target_text)
-        elif self.target_grid_var:
-            self.target_grid_var.set(target_text)
-
-        # mise à Jour de la Grille UTTT
-        for principal_coords in range(9):
-            for secondary_coords in range(9):
-
-                if principal_coords in self.buttons and secondary_coords in self.buttons[principal_coords]:
-
-                    etat_case = self.jeu.get_etat_case(principal_coords, secondary_coords)
-                    btn = self.buttons[principal_coords][secondary_coords]
-
-                    btn.config(text=etat_case)
-
-                    # couleur de fond pour la grille ciblée et jouée
-                    if target_grid is not None and principal_coords == target_grid:
-                        btn.config(bg="#ADD8E6")  # Bleu clair (cible)
-
-                    elif etat_case != "":
-                        bg_color = "#C0C0C0" if etat_case == self.jeu.J1 else "#D3D3D3"
-                        btn.config(bg=bg_color,relief=tk.SUNKEN, sticky="nsew")
-                    else:
-                        btn.config(bg="SystemButtonFace", relief=tk.FLAT)
-
-
     def handle_click(self, principal_coords, secondary_coords):
         """Gère le clic de l'utilisateur sur une case (appelle la simulation de JeuTicTacToeCorrige)."""
         try:
-            if self.jeu.jouer_coup_simule(principal_coords, secondary_coords):
+            if self.jeu.jouer_coup_global(principal_coords, secondary_coords):
                 self.update_game_state()
             else:
-                if self.jeu.get_etat_case(principal_coords, secondary_coords) != "":
+                if self.jeu.get_etat_case(principal_coords, secondary_coords) != None:
                     msg = "La case est déjà occupée."
-                elif self.jeu.get_grille_cible() is not None:
-                    msg = f"Vous devez jouer dans la Grille {self.jeu.get_grille_cible() + 1}."
+                elif self.jeu.grille_actuelle is not None:
+                    msg = f"Vous devez jouer dans la Grille {self.jeu.grille_actuelle_index+ 1}."
                 else:
                     msg = "Coup invalide."
                 messagebox.showerror("Coup Invalide", msg)
@@ -330,13 +294,14 @@ class UltimateTicTacToeGUI:
             messagebox.showerror("Erreur de Jeu", f"Erreur critique: {e}")
 
     def update_game_state(self): #mise à Jour de l'Interface
-        current_player_signe = self.jeu.get_joueur_actuel_signe()
-        target_grid = self.jeu.get_grille_cible()
+        current_player_signe = self.jeu.joueur_actuel
+        target_grid = self.jeu.grille_actuelle
+        target_grid_index = self.jeu.grille_actuelle_index
 
         if self.current_player_var:
             self.current_player_var.set(f"Joueur Actuel: ({current_player_signe})")
 
-        target_text = f"Grille Ciblée: {target_grid + 1}" if target_grid is not None else "Grille Ciblée: Aucune (Libre)"
+        target_text = f"Grille Ciblée: {target_grid_index + 1}" if target_grid is not None else "Grille Ciblée: Aucune (Libre)"
 
         if self.mode_de_jeu == "JvsJ" and self.info_panel_target_var:
             self.info_panel_target_var.set(target_text)
@@ -377,18 +342,20 @@ class UltimateTicTacToeGUI:
 
                 if principal_coords in self.buttons and secondary_coords in self.buttons[principal_coords]:
 
-                    etat_case = self.jeu.get_etat_case(principal_coords, secondary_coords)
+                    etat_case = self.jeu.get_etat_case(principal_coords,secondary_coords)
                     btn = self.buttons[principal_coords][secondary_coords]
 
                     btn.config(text=etat_case)
 
-                    if target_grid is not None and principal_coords == target_grid: # Mise à jour de la couleur de fond pour la grille ciblée
+                    # couleur de fond pour la grille ciblée et jouée
+                    if target_grid is not None and principal_coords == target_grid:
                         btn.config(bg="#ADD8E6")  # Bleu clair (cible)
+
                     elif etat_case != "":
                         bg_color = "#C0C0C0" if etat_case == self.jeu.J1 else "#D3D3D3"
-                        btn.config(bg=bg_color)
+                        btn.config(bg=bg_color,relief=tk.SUNKEN, sticky="nsew")
                     else:
-                        btn.config(bg="SystemButtonFace")  # Couleur par défaut
+                        btn.config(bg="SystemButtonFace", relief=tk.FLAT)
 
 
 
