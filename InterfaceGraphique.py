@@ -306,7 +306,6 @@ class UltimateTicTacToeGUI:
         current_player_signe = self.jeu.joueur_actuel
         #target_grid = self.jeu.grille_actuelle
         target_grid_index = self.jeu.grille_actuelle_index
-        #print("target_grid", target_grid)
 
 
         if self.current_player_var:

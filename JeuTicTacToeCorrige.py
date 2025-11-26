@@ -251,9 +251,9 @@ class Jeu():
 
         # 2. Vérification si la petite grille est déjà gagnée/nulle
         # On ne peut pas jouer dans une petite grille déjà terminée.
-        if grille_visee.gagnant is not None:
-            print(30)
-            return False
+        #if grille_visee.gagnant is not None:
+         #   print(30)
+          #  return False
 
         # 3. Vérification si la case est déjà occupée
         case_visee = grille_visee.get_case(case)
@@ -280,10 +280,8 @@ class Jeu():
         petite_grille=self.plateau.get_petite_grille(grille)
         petite_grille.jouer_coup(case,self.joueur_actuel)
 
-        if petite_grille.verifier_victoire(case):
-            self.grille_gagne.append(grille)
-
         prochaine_grille = self.plateau.get_petite_grille(case)
+
         self.grille_actuelle = prochaine_grille
         self.grille_actuelle_index = case
 
