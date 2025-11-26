@@ -18,6 +18,38 @@ class Tictactoe(JeuFactice):
     def nomjsp(self, joueur, grille, case):
         self.plateau[grille][case[0]][case[1]] == self.joueur
 
+    # --- NOUVELLES MÉTHODES UTILES POUR L'IHM (simples) ---
+    def get_joueur_actuel_signe(self):
+        return self._joueur_actuel_signe
+
+    def get_grille_cible(self):
+        return self._grille_cible
+
+    def get_etat_case(self, i_principal, i_secondaire):
+        # Retourne le signe à la position (principal_coords, secondary_coords) ou une chaîne vide
+        return self._plateau.get((i_principal, i_secondaire), "")
+
+    def jouer_coup_simule(self, i_principal, i_secondaire):
+        """
+        Simule la logique minimale pour l'affichage (Placement, Changement de Joueur, Grille Cible).
+        C'est cette fonction que l'IHM doit appeler.
+        """
+        if self.get_etat_case(i_principal, i_secondaire) == "":
+
+            is_valid_target = (self._grille_cible is None) or (self._grille_cible == i_principal)
+
+            if is_valid_target:
+                # 1. PLACEMENT du signe
+                self._plateau[(i_principal, i_secondaire)] = self._joueur_actuel_signe
+
+                # 2. ALTERNANCE du joueur
+                self._joueur_actuel_signe = "X" if self._joueur_actuel_signe == "O" else "O"
+
+                # 3. DÉFINITION de la nouvelle grille cible
+                self._grille_cible = i_secondaire
+                return True
+        return False
+
 
 class Cellule():
     def __init__(self):
