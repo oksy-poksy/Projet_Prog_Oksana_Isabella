@@ -113,26 +113,31 @@ class PetiteGrille:
             return False, None
 
         # verif colonne
-        if self.grille[0][casec].valeur == self.grille[1][casec].valeur == self.grille[2][casec].valeur:
+        if (self.grille[0][casec].valeur == self.grille[1][casec].valeur == self.grille[2][casec].valeur
+            and self.grille[0][casec].valeur is not None):
             self.gagnant = self.grille[0][casec].valeur
-            return True, self.grille[casel][casec].valeur
+            return True, self.gagnant
 
-        if self.grille[casel][0].valeur == self.grille[casel][1].valeur == self.grille[casel][2].valeur:
-            self.gagnant = self.grille[0][casec].valeur
-            return True, self.grille[casel][casec].valeur
+        # verif ligne
+        if (self.grille[casel][0].valeur == self.grille[casel][1].valeur == self.grille[casel][2].valeur
+            and self.grille[casel][0].valeur is not None):
+            self.gagnant = self.grille[casel][0].valeur
+            return True, self.gagnant
 
+        # verif diagonales
         if case_index in [0, 2, 4, 6, 8]:
-            if self.grille[0][0].valeur == self.grille[1][1].valeur == self.grille[2][2].valeur:
-                self.gagnant = self.grille[0][casec].valeur
-                return True, self.grille[casel][casec].valeur
-            if self.grille[0][2].valeur == self.grille[1][1].valeur == self.grille[2][0].valeur:
-                self.gagnant = self.grille[0][casec].valeur
-                return True, self.grille[casel][casec].valeur
-        return False, None
+            if (self.grille[0][0].valeur == self.grille[1][1].valeur == self.grille[2][2].valeur
+                and self.grille[0][0].valeur is not None):
+                self.gagnant = self.grille[0][0].valeur
+                return True, self.gagnant
+            if (self.grille[0][2].valeur == self.grille[1][1].valeur == self.grille[2][0].valeur
+                and self.grille[0][2].valeur is not None):
+                self.gagnant = self.grille[0][2].valeur
+                return True, self.gagnant
 
-        # 4.match nul
+        # 4. match nul
         if self.est_plein():
-            self.gagnant="NUL"
+            self.gagnant = "NUL"
             return True, "NUL"
 
         return False, None
@@ -158,29 +163,33 @@ class GrilleGlobale(PetiteGrille):
         colonne = grille % 3
         return ligne,colonne
 
-    def verifier_victoire_globale(self,grille_index):
-
-
+    def verifier_victoire_globale(self, grille_index):
         grille_coord = self.get_coords_grille(grille_index)
         if self.get_petite_grille(grille_index).gagnant == None:
             return False, None
 
         # verif colonne
-        if self.grille_global[0][grille_coord[1]].gagnant == self.grille_global[1][grille_coord[1]].gagnant == self.grille_global[2][grille_coord[1]].gagnant:
+        if (self.grille_global[0][grille_coord[1]].gagnant == self.grille_global[1][grille_coord[1]].gagnant == self.grille_global[2][grille_coord[1]].gagnant
+            and self.grille_global[0][grille_coord[1]].gagnant is not None):
             self.gagnant_global = self.grille_global[0][grille_coord[1]].gagnant
             return True, self.grille_global[0][grille_coord[1]].gagnant
 
-        if self.grille_global[grille_coord[0]][0].gagnant == self.grille_global[grille_coord[0]][1].gagnant == self.grille_global[grille_coord[0]][2].gagnant:
+        # verif ligne
+        if (self.grille_global[grille_coord[0]][0].gagnant == self.grille_global[grille_coord[0]][1].gagnant == self.grille_global[grille_coord[0]][2].gagnant
+            and self.grille_global[grille_coord[0]][0].gagnant is not None):
             self.gagnant_global = self.grille_global[grille_coord[0]][0].gagnant
             return True, self.grille_global[grille_coord[0]][0].gagnant
 
+        # verif diagonales
         if grille_index in [0, 2, 4, 6, 8]:
-            if self.grille_global[0][0].gagnant == self.grille_global[1][1].gagnant == self.grille_global[2][2].gagnant:
+            if (self.grille_global[0][0].gagnant == self.grille_global[1][1].gagnant == self.grille_global[2][2].gagnant
+                and self.grille_global[0][0].gagnant is not None):
                 self.gagnant_global = self.grille_global[0][0].gagnant
                 return True, self.grille_global[0][0].gagnant
-            if self.grille_global[0][2].gagnant == self.grille_global[1][1].gagnant == self.grille_global[2][0].gagnant:
+            if (self.grille_global[0][2].gagnant == self.grille_global[1][1].gagnant == self.grille_global[2][0].gagnant
+                and self.grille_global[0][2].gagnant is not None):
                 self.gagnant_global = self.grille_global[0][2].gagnant
-                return True, self.gagnant_global
+                return True, self.grille_global[0][2].gagnant
         return False, None
     def get_petite_grille(self, grille):
         #grille=1,...,8
@@ -313,13 +322,3 @@ class Jeu():
         output += f"--- Plateau Global ---\n"
         output += repr(self.plateau)  # Utilise la surcharge de GrilleGlobale
         return output
-
-
-
-
-
-
-
-
-
-
