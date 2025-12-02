@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pds
 
 
-df2=pds.read_csv("Pokemeon.csv",index_col="Name")
+
+df2=pds.read_csv("Pokemon.csv",index_col="Name")
 print(df2["Type 1"].unique())
 df3=df2[-df2["Type 1"].isin(["Normal","Flying","Dragon","Poison","Ghost","Fairy","Fighting","Ice","Dark","Steel","Psychic","Bug"])]
 print(df3["Type 1"].unique())
