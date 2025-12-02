@@ -801,7 +801,7 @@ class UltimateTicTacToeGUI:
                             btn.config(bg="white", relief=tk.FLAT)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": #
     root = tk.Tk()
 
     try:
