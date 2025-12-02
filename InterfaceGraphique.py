@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from JeuTicTacToeCorrige import Jeu
 import pandas as pd
-from PIL import Image, ImageTk  # TENTATIVE
+from PIL import Image, ImageTk  # TENTATIVE kjwb
 from random import choice, randint
 
 

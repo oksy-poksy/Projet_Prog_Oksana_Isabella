@@ -1,5 +1,5 @@
 from JeuFactice import JeuFactice
-from random import choice #a la place de random car ca faisiait une erreur
+from random import choice #a la place de random car ca faisiait une erreur kfevfcb
 
 class Tictactoe(JeuFactice):
     def __init__(self):
