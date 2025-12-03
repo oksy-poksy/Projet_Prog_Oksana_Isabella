@@ -1,15 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
-
-from PIL.ImageOps import expand
-
 from JeuTicTacToeCorrige import Jeu
 import pandas as pds
 from PIL import Image, ImageTk  # TENTATIVE
 from random import choice, choices
 import os
 FILENAME = "images_pokemon"
-import requests
 from CraftInterfacepokemon import download_and_name_pokemon_images, combat_pokemon
 
 class IAJoueur:
@@ -257,7 +253,7 @@ class UltimateTicTacToeGUI:
         self.master = master
         master.title("Project 2026: UTTT X Pokémon")
 
-        try:  # Tente de charger et filtrer les Pokémons ____________________________ REMPLACER AVEC LE CODE D'ALBIN
+        try:  # Tente de charger et filtrer les Pokémons
             self.pokemons= self._obtenir_pokemon()
             self.pokemons_names = self.pokemons.index.values.tolist()
         except FileNotFoundError:
@@ -453,7 +449,7 @@ class UltimateTicTacToeGUI:
     def show_classic_game_interface(self):
         self.game_frame.pack(fill="both", expand=True)
 
-        # --- 1. Charger et Placer l'Image de Fond sur un Canvas ---
+        #charger et Placer l'Image de Fond
         game_bg_image_path = "prairie_horizontale.jpg"
         try:
             original_game_image = Image.open(game_bg_image_path)
@@ -504,57 +500,62 @@ class UltimateTicTacToeGUI:
         self.update_game_state(self.main_game_canvas)  # Mettre à jour l'affichage initial
 
     def show_pokemon_interface(self):
-
         self.game_frame.pack(fill="both", expand=True)
-        game_bg_image_path = "fond_ecran_pokemon.jpg"
-        try:
-            original_game_image = Image.open(game_bg_image_path)
-            width, height = self.master.winfo_screenwidth(), self.master.winfo_screenheight()
-            resized_game_image_pokemon = original_game_image.resize((width, height), Image.LANCZOS)
-            self.game_bg_photo_pokemon = ImageTk.PhotoImage(resized_game_image_pokemon)
-
-            # Utiliser un Canvas pour dessiner l'image de fond et le texte par-dessus
-            self.main_game_canvas = tk.Canvas(self.game_frame, width=width, height=height, highlightthickness=0)
-            self.main_game_canvas.create_image(0, 0, image=self.game_bg_photo_pokemon, anchor='nw')
-            self.main_game_canvas.pack(fill="both", expand=True)
-
-            # Créer des textes sur le Canvas
-            self.canvas_current_text_id = self.main_game_canvas.create_text(width / 2, 18, text="",font=("Arial", 28, "bold"), fill="black")
-            self.canvas_target_text_id = self.main_game_canvas.create_text(width / 2 + 500, 18, text="",font=("Arial", 20), fill="black")
-
-            # Textes joueurs gauche/droite (initialement vides)
-            self.canvas_j1_id = self.main_game_canvas.create_text(width * 0.12, height / 3, text="", font=("Arial", 26),fill="black", anchor='n')
-            self.canvas_j2_id = self.main_game_canvas.create_text(width * 0.88, height / 3, text="", font=("Arial", 26),fill="black", anchor='n')
-
-            # Créer et placer la zone centrale (grille) en tant que widget sur le Canvas
-            self.center_container = tk.Frame(self.main_game_canvas)
-            # Définir la taille de la fenêtre contenant la grille
-            center_w, center_h = 700, 700
-            center_x, center_y = width / 2, height / 2
-            self.main_game_canvas.create_window(center_x, center_y, window=self.center_container, width=center_w,height=center_h)
-
-            # Grille UTTT (gardée comme Frame pour conserver la logique actuelle)
-            self.uttt_frame_poke = tk.Frame(self.center_container, bg="light sky blue", bd=5, relief=tk.SUNKEN,width=center_w, height=center_h)
-            self.uttt_frame_poke.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-            self.uttt_frame_poke.grid_propagate(False)
-            self.create_uttt_grid_pokemon(self.uttt_frame_poke, font_size=28)
-
-            # Bouton Retour Menu : petit bouton placé sur le Canvas (en bas à gauche)
-            self.return_button = tk.Button(self.main_game_canvas, text="Retour Menu", font=("Arial", 14),command=self.show_menu, bg="sea green", fg="white")
-            self.main_game_canvas.create_window(width * 0.12, height - 135, window=self.return_button, width=160,height=36)
-
-        except FileNotFoundError:
-            messagebox.showwarning("Erreur Image",f"Le fichier image '{game_bg_image_path}' est introuvable. Fond bleu clair utilisé.")
-            return
-        except Exception as e:
-            messagebox.showwarning("Erreur Image", f"Erreur critique lors du chargement de l'image : {e}")
-            return
-
-        """Affiche deux grilles de 10 Pokémons aléatoires (5x2) de chaque côté de la grille UTTT."""
-
-        # 1. Préparation des variables et constantes
+        
+        # Chargement de l'image
+        game_bg_image_path = "prairie_image_sunset.jpg"
+        self.game_bg_photo_pokemon = None
         width = self.master.winfo_screenwidth()
         height = self.master.winfo_screenheight()
+        bg_loaded = False
+
+        try:
+            original_game_image = Image.open(game_bg_image_path)
+            resized_game_image_pokemon = original_game_image.resize((width, height), Image.LANCZOS)
+            self.game_bg_photo_pokemon = ImageTk.PhotoImage(resized_game_image_pokemon)
+            bg_loaded = True
+        except FileNotFoundError:
+            messagebox.showwarning("Erreur Image", f"Le fichier image '{game_bg_image_path}' est introuvable. Fond uni utilisé.")
+        except Exception as e:
+            messagebox.showwarning("Erreur Image", f"Erreur critique lors du chargement de l'image : {e}. Fond uni utilisé.")
+
+        # Création du canva
+        if bg_loaded and self.game_bg_photo_pokemon:
+            # Création avec image
+            self.main_game_canvas = tk.Canvas(self.game_frame, width=width, height=height, highlightthickness=0)
+            self.main_game_canvas.create_image(0, 0, image=self.game_bg_photo_pokemon, anchor='nw')
+            self.main_game_canvas.image = self.game_bg_photo_pokemon 
+        else:
+            self.main_game_canvas = tk.Canvas(self.game_frame, width=width, height=height, bg='light blue', highlightthickness=0)
+        
+        self.main_game_canvas.pack(fill="both", expand=True)
+        
+        # Créer des textes sur le Canvas
+        self.canvas_current_text_id = self.main_game_canvas.create_text(width / 2, 18, text="",font=("Arial", 28, "bold"), fill="black")
+        self.canvas_target_text_id = self.main_game_canvas.create_text(width / 2 + 500, 18, text="",font=("Arial", 20), fill="black")
+
+        # Textes joueurs gauche/droite (initialement vides)
+        self.canvas_j1_id = self.main_game_canvas.create_text(width * 0.12, height / 3, text="", font=("Arial", 26),fill="black", anchor='n')
+        self.canvas_j2_id = self.main_game_canvas.create_text(width * 0.88, height / 3, text="", font=("Arial", 26),fill="black", anchor='n')
+
+        # Créer et placer la zone grille en tant que widget sur le Canvas
+        self.center_container = tk.Frame(self.main_game_canvas)
+        # Définir la taille de la fenêtre contenant la grille
+        center_w, center_h = 700, 700
+        center_x, center_y = width / 2, height / 2
+        self.main_game_canvas.create_window(center_x, center_y, window=self.center_container, width=center_w,height=center_h)
+
+        # Grille UTTT
+        self.uttt_frame_poke = tk.Frame(self.center_container, bg="light sky blue", bd=5, relief=tk.SUNKEN,width=center_w, height=center_h)
+        self.uttt_frame_poke.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.uttt_frame_poke.grid_propagate(False)
+        
+        # Appel de la grille
+        self.create_uttt_grid_pokemon(self.uttt_frame_poke, font_size=28)
+
+        # Bouton Retour Menu : petit bouton placé sur le Canvas (en bas à gauche)
+        self.return_button = tk.Button(self.main_game_canvas, text="Retour Menu", font=("Arial", 14),command=self.show_menu, bg="sea green", fg="white")
+        self.main_game_canvas.create_window(width * 0.12, height - 135, window=self.return_button, width=160,height=36)
 
         # Réinitialisation des références d'images
         self.pokemon_image_refs_j1 = []
@@ -563,8 +564,7 @@ class UltimateTicTacToeGUI:
         if not os.path.exists(FILENAME):
             os.makedirs(FILENAME)
 
-
-        # Sélectionne 20 Pokémon (avec répétition si la liste est courte)
+        # Sélectionne 20 Pokémon
         if len(self.pokemons_names) < 20:
             selected_pokemon = choices(self.pokemons_names, k=20)
         else:
@@ -582,35 +582,31 @@ class UltimateTicTacToeGUI:
         center_x_j2 = width * 0.88  # Droite
         center_y = height / 2
 
-        # --- Fonction interne pour créer une grille de Pokémon ---
+        # Fonction interne pour créer une grille de Pokémon
         def create_pokemon_grid(canvas, x, y, frame_w, frame_h, pokemon_names_list, image_ref_list,owner_grid):
             if self.current_button_pokemon:
                 try:
-                    # Only modify if the widget still exists
                     if self.current_button_pokemon.winfo_exists():
                         self.current_button_pokemon.config(
                             relief=tk.RAISED,
-                            bg="#F0F8FF",
+                            bg="plum3",
                             highlightbackground="SystemButtonFace",
                             highlightcolor="SystemButtonFace"
                         )
                 except Exception:
-                    pass  # Safe fallback — widget was destroyed
+                    pass
 
-            grid_frame = tk.Frame(canvas, bg="#F0F8FF", bd=3, relief=tk.GROOVE)  # Fond bleu très clair
-            #canvas.create_window(x, y, window=grid_frame, width=frame_w, height=frame_h, anchor=tk.CENTER)
+            grid_frame = tk.Frame(canvas, bg="plum3", bd=3, relief=tk.GROOVE)
 
             poke_w, poke_h = 90, 90
 
             for i, pokemon in enumerate(pokemon_names_list):
                 try:
-                    # Tente de télécharger l'image (si elle n'existe pas)
-                    #download_and_name_pokemon_images(pokemon)
 
                     row = i // cols
                     col = i % cols
 
-                    # Nettoyage du nom pour trouver le fichier local (identique à la fonction de téléchargement)
+                    # Nettoyage du nom pour trouver le fichier local
                     cleaned_name = pokemon.replace(' ', '_').replace('.', '')
                     image_poke_path = os.path.join(FILENAME, f"{cleaned_name}.png")
 
@@ -631,7 +627,7 @@ class UltimateTicTacToeGUI:
                     poke_but.config(command=lambda p=pokemon,b=poke_but: self.select_pokemon(p, owner_grid,b))
 
 
-                    poke_but.image = poke_image_tk #essentiel maitenant les images s'affichent !!!
+                    poke_but.image = poke_image_tk
                     poke_but.text = pokemon
                     poke_but.grid(row=row, column=col, padx=0, pady=0)
 
@@ -649,7 +645,7 @@ class UltimateTicTacToeGUI:
                                                                                                         sticky="nsew")
             canvas.create_window(x, y, window=grid_frame, width=frame_w, height=frame_h, anchor=tk.CENTER)
 
-        # 4. Création des deux grilles sur le canvas principal
+        # Création des deux grilles sur le canvas principal
         try:
             # Grille J1 (Gauche)
             create_pokemon_grid(self.main_game_canvas, center_x_j1, center_y, grid_width, grid_height, poke_j1_names,
@@ -774,7 +770,7 @@ class UltimateTicTacToeGUI:
                                                            pady=5,
                                                            sticky="w")
 
-    # étails du Panneau d'Informations (Classique - JvsJ)
+
     def create_player_info_panel_classic(self, parent_frame, player_label, player_sign, is_left_panel):
         inner_frame = tk.Frame(parent_frame)
         inner_frame.pack(expand=True, anchor=tk.CENTER)
@@ -888,7 +884,8 @@ class UltimateTicTacToeGUI:
                     self.ia_turn_pending = True
                     self.master.after(500, self.jouer_coup_ia)
             else:
-                if self.jeu.get_etat_case(principal_coords, secondary_coords) != None:
+                # get_etat_case retourne "" pour vide, et "X"/"O" pour occupé -> tester contre ""
+                if self.jeu.get_etat_case(principal_coords, secondary_coords) != "":
                     msg = "La case est déjà occupée."
                 elif self.jeu.grille_actuelle is not None:
                     msg = f"Vous devez jouer dans la Grille {self.jeu.grille_actuelle_index + 1}."
@@ -903,7 +900,7 @@ class UltimateTicTacToeGUI:
         current_player_signe = self.jeu.joueur_actuel
         target_grid_index = self.jeu.grille_actuelle_index
 
-        # --- Mise à jour des textes sur le Canvas (inchangé) ---
+        # Mise à jour des textes sur le Canvas
         target_text = f"Grille Ciblée: {target_grid_index + 1}" if target_grid_index is not None else "Grille Ciblée: Aucune (Libre)"
 
         if hasattr(self, 'main_game_canvas'):
@@ -947,7 +944,7 @@ class UltimateTicTacToeGUI:
             except Exception:
                 pass
 
-        # --- Mise à Jour de la Grille UTTT et de la Surbrillance ---
+        #Mise à Jour de la Grille UTTT et de la Surbrillance
         for principal_coords in range(9):
 
             if principal_coords in self.small_grid_frames:
@@ -983,7 +980,7 @@ class UltimateTicTacToeGUI:
                     print("3")
                     frame.config(bg="light sky blue", bd=3, relief=tk.RIDGE) # Grilles non ciblées
 
-            # --- Gestion des cases individuelles (boutons) - uniquement si grille non gagnée ---
+            #Gestion des cases individuelles (boutons) uniquement si grille non gagnée
             if principal_coords not in self.grilles_gagnees:
                 for secondary_coords in range(9):
                     if principal_coords in self.buttons and secondary_coords in self.buttons[principal_coords]:
@@ -994,7 +991,6 @@ class UltimateTicTacToeGUI:
                         btn.config(text=etat_case)
 
                         if target_grid_index is not None and principal_coords == target_grid_index:
-                            # Case dans la grille ciblée : Fond Light Sky Blue, relief FLAT
                             btn.config(bg="light sky blue", relief=tk.FLAT, fg="black")
 
                         elif etat_case != "":
@@ -1007,13 +1003,13 @@ class UltimateTicTacToeGUI:
     def select_pokemon(self, pokemon_name, owner_grid, button):
         if owner_grid != self.jeu.joueur_actuel:
             messagebox.showwarning("Tour Incorrect",f"Ce n'est pas votre tour ! C'est au tour de {self.jeu.joueur_actuel}.")
+            return
 
         self.current_selected_pokemon = pokemon_name
         print(f" current_pokemon: {self.current_selected_pokemon}")
 
         #GESTION DES BOUTONS MIS EN AVANT
         if self.current_button_pokemon is not None:
-            # On remet le style par défaut si il veut changer de pokémon séléctionné
             self.current_button_pokemon.config(relief=tk.RAISED, bg="#F0F8FF", highlightbackground="SystemButtonFace",highlightcolor="SystemButtonFace")
 
 
@@ -1040,7 +1036,7 @@ class UltimateTicTacToeGUI:
         poke_image_tk = ImageTk.PhotoImage(resized_image)
 
         # Appliquer la configuration
-        button.config(text=player_signe, image=poke_image_tk, compound=tk.CENTER, font=("Arial", 30, "bold"),
+        button.config(text="", image=poke_image_tk, compound=tk.CENTER, font=("Arial", 30, "bold"),
                       fg="salmon1" if player_signe == self.jeu.J1 else "steel blue")
         button.image = poke_image_tk
         button.pokemon_name = pokemon_name  # Stocker le nom pour les futurs défis
@@ -1057,7 +1053,6 @@ class UltimateTicTacToeGUI:
             adversaire = self.jeu.J1
 
         if etat_case == adversaire:
-            #verification grille
             if self.jeu.grille_actuelle_index != None and self.jeu.grille_actuelle_index != principal_coords:
                 messagebox.showwarning("Règle UTTT",f"Vous devez jouer dans la Grille {self.jeu.grille_actuelle_index + 1}.")
                 return
@@ -1066,8 +1061,8 @@ class UltimateTicTacToeGUI:
             winner = self.combat_pokemon_interface(self.current_selected_pokemon, pokemon_adversaire, principal_coords, secondary_coords,button)
 
             if winner == pokemon_adversaire:
-                self.jeu.forcer_capture(principal_coords, secondary_coords,adversaire)  #remplace dans la logique
-                self.update_button_with_pokemon(button, pokemon_adversaire, adversaire) #remplace le pokemon dans l'interface
+                self.jeu.forcer_capture(principal_coords, secondary_coords,adversaire)  #
+                self.update_button_with_pokemon(button, pokemon_adversaire, adversaire)
 
                 #verif victoire
                 petite_grille = self.jeu.plateau.get_petite_grille(principal_coords)
@@ -1087,9 +1082,11 @@ class UltimateTicTacToeGUI:
             return
 
 
+        played = False
         try:
-            #gestion validité coup
-            if self.jeu.jouer_coup_global(principal_coords, secondary_coords):
+            # gestion validité coup
+            played = self.jeu.jouer_coup_global(principal_coords, secondary_coords)
+            if played:
                 # Vérifier si une grille a été gagnée après ce coup
                 petite_grille = self.jeu.plateau.get_petite_grille(principal_coords)
                 if petite_grille.gagnant is not None:
@@ -1107,14 +1104,11 @@ class UltimateTicTacToeGUI:
                     self.ia_turn_pending = True
                     self.master.after(500, self.jouer_coup_ia)
             else:
-                if etat_case != None:
+                # Vérifications d'erreur plus précises
+                if etat_case != "":
                     msg = "La case est déjà occupée."
                 elif self.jeu.grille_actuelle is not None:
                     msg = f"Vous devez jouer dans la Grille {self.jeu.grille_actuelle_index + 1}."
-
-                elif etat_case == self.jeu.joueur_actuel:
-                    messagebox.showwarning("Impossible", "Vous occupez déjà cette case.")
-
                 else:
                     msg = "Coup invalide."
                 messagebox.showerror("Coup Invalide", msg)
@@ -1122,32 +1116,32 @@ class UltimateTicTacToeGUI:
         except Exception as e:
             messagebox.showerror("Erreur de Jeu", f"Erreur critique: {e}")
 
-        #print("current player", current_player_signe)
-        # MISE À JOUR VISUELLE
-        if self.game_phase_pokemon == "PLACEMENT POKEMON":
 
-            poke_w, poke_h = 80,80
+        # Mise à jour visuelle du placement POKEMON : uniquement si le coup a bien été joué (played == True)
+        if self.game_phase_pokemon == "PLACEMENT POKEMON" and played:
+            poke_w, poke_h = 80, 80
             image_poke_path = os.path.join(FILENAME, f"{self.current_selected_pokemon}.png")
 
-            #gestion des pokeballs
+            # gestion des pokeballs
             if not os.path.exists(image_poke_path):
                 pokeball = "pokeball.png"
-                image_poke_path= os.path.join(FILENAME, pokeball)
+                image_poke_path = os.path.join(FILENAME, pokeball)
 
             poke_image_original = Image.open(image_poke_path)
             resized_image = poke_image_original.resize((poke_w, poke_h))
             poke_image_tk = ImageTk.PhotoImage(resized_image)
 
-            #enlever la lettre et mettre que la couleur bg(background) si cela fonctionne car sur mac les boutons ne se colorent pas
-            button.config(text = current_player_signe,image=poke_image_tk,compound=tk.CENTER,font=("Arial", 60, "bold"),bg="salmon1" if current_player_signe == "X" else "steel blue",fg="salmon1" if current_player_signe == "X" else "steel blue")
+
+            button.config(text="", image=poke_image_tk, compound=tk.CENTER, bg=("salmon1" if current_player_signe == "X" else "steel blue"))
             button.image = poke_image_tk
-            button.text= current_player_signe
+            button.text = ""
 
-            #actualisation de pokémon placés
-            self.placed_pokemon[(principal_coords,secondary_coords)]=self.current_selected_pokemon
+            # actualisation de pokémon placés
+            self.placed_pokemon[(principal_coords, secondary_coords)] = self.current_selected_pokemon
 
-            if self.current_button_pokemon is not None: #une fois posé le pokémon la case n'est plus highlitghté
-                self.current_button_pokemon.config(relief=tk.RAISED, bg="#F0F8FF",highlightbackground="SystemButtonFace",highlightcolor="SystemButtonFace")
+            if self.current_button_pokemon is not None:  # une fois posé le pokémon la case n'est plus highlitghté
+                self.current_button_pokemon.config(relief=tk.RAISED, bg="#F0F8FF", highlightbackground="SystemButtonFace",
+                                                   highlightcolor="SystemButtonFace")
 
             self.current_button_pokemon = None
             self.game_phase_pokemon = "SELECTION"
@@ -1190,7 +1184,7 @@ class UltimateTicTacToeGUI:
 
         tk.Label(frame_combat, text="VS", font=("Arial", 30, "bold"), fg="red").pack(side=tk.LEFT)
 
-        # --- DÉFENSEUR (Droite) ---
+        # DÉFENSEUR (Droite)
         frame_def = tk.Frame(frame_combat)
         frame_def.pack(side=tk.LEFT,expand=True)
         tk.Label(frame_def, text="Défenseur", fg="red").pack(anchor=tk.CENTER)
@@ -1211,7 +1205,7 @@ class UltimateTicTacToeGUI:
         tk.Label(frame_def, text=pokemon2, font=("Arial", 16, "bold")).pack(anchor=tk.CENTER)
 
 
-        # --- BOUTON LANCER LE COMBAT ---
+
         #_______________lancement combat_______________
         def lancer_combat():
             winner = combat_pokemon(self.pokemons, pokemon1,pokemon2)
@@ -1228,8 +1222,6 @@ class UltimateTicTacToeGUI:
 
         tk.Button(frame_combat, text="LANCER LE COMBAT", command=lancer_combat, pady=10 ,padx= 10, fg="black",font=("Arial", 14)).pack(expand=True, anchor=tk.CENTER)
         #return lancer_combat()
-
-
 
 
 
