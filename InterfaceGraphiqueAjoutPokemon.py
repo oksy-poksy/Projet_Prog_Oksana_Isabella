@@ -1122,7 +1122,7 @@ class UltimateTicTacToeGUI:
         except Exception as e:
             messagebox.showerror("Erreur de Jeu", f"Erreur critique: {e}")
 
-        print("current player", current_player_signe)
+        #print("current player", current_player_signe)
         # MISE À JOUR VISUELLE
         if self.game_phase_pokemon == "PLACEMENT POKEMON":
 
@@ -1157,7 +1157,7 @@ class UltimateTicTacToeGUI:
     def combat_pokemon_interface(self,pokemon1,pokemon2, principal_coords, secondary_coords, button):
         fenetre_combat = tk.Toplevel(self.master)
         fenetre_combat.title("⚔️ COMBAT POKÉMON ⚔️")
-        fenetre_combat.geometry("600x400")
+        fenetre_combat.geometry("1000x400")
 
         tk.Label(fenetre_combat, text="COMBAT !", font=("Arial", 24, "bold")).pack(pady=10)
 
@@ -1226,7 +1226,7 @@ class UltimateTicTacToeGUI:
 
             return winner
 
-        tk.Button(frame_combat, text="LANCER LE COMBAT", command=lancer_combat, bg="red", fg="black",font=("Arial", 14)).pack(expand=True, anchor=tk.CENTER)
+        tk.Button(frame_combat, text="LANCER LE COMBAT", command=lancer_combat, pady=10 ,padx= 10, fg="black",font=("Arial", 14)).pack(expand=True, anchor=tk.CENTER)
         #return lancer_combat()
 
 
