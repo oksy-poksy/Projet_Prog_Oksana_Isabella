@@ -1219,13 +1219,6 @@ class UltimateTicTacToeGUI:
 
             if winner == pokemon1:
                 messagebox.showinfo("Résultat", f"{pokemon1} gagne !\nLa case est capturée.")
-            # APPLIQUER LA VICTOIRE : On force le coup sur la case
-            # Note : Il faut une méthode dans Jeu pour forcer un coup ou changer le propriétaire
-            # Pour l'instant, on peut simuler en changeant l'état manuellement si votre classe Jeu le permet
-            # Ou implémenter une méthode self.jeu.forcer_capture(p, s, joueur)
-
-            # Mise à jour visuelle (Mettre l'image de l'attaquant)
-            # ... (Code de mise à jour image comme dans handle_click_pokemon) ...
 
             else:
                 messagebox.showinfo("Résultat", f"{pokemon2} gagne !\nLa défense tient bon.")
@@ -1234,7 +1227,7 @@ class UltimateTicTacToeGUI:
             return winner
 
         tk.Button(frame_combat, text="LANCER LE COMBAT", command=lancer_combat, bg="red", fg="black",font=("Arial", 14)).pack(expand=True, anchor=tk.CENTER)
-        return lancer_combat()
+        #return lancer_combat()
 
 
 
